@@ -1,10 +1,62 @@
 <!DOCTYPE html>
-<html>
+<html lang="pl">
 <head>
-	<title>Hello World!</title>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.8.0/p5.min.js"></script>
-	<script type="text/javascript" src="test.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hitem</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-512.png"
 </head>
 <body>
+  <video id="qr-video"></video>
+  <br>
+  <b>Detected QR code: </b>
+  <span id="cam-qr-result">None</span>
+  <br>
+  <button id="start-button">Start</button>
+  <button id="stop-button">Stop</button>
+  <button id="install" hidden>Install</button>
+  <div id="embed-iframe"></div>
+  <button id="play" hidden>Play</button>
+
+  <script type="module" src="app.js" defer></script>
+  <script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.onload = () => {
+        navigator.serviceWorker.register(
+          '/serviceworker.js'
+        );
+      }
+    }
+
+    let installPrompt = null;
+    const installButton = document.querySelector("#install");
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      installPrompt = event;
+      installButton.removeAttribute("hidden");
+    });
+
+    installButton.addEventListener("click", async () => {
+      if (!installPrompt) {
+        return;
+      }
+      const result = await installPrompt.prompt();
+      console.log(`Install prompt was: ${result.outcome}`);
+      disableInAppInstallPrompt();
+    });
+
+    function disableInAppInstallPrompt() {
+      installPrompt = null;
+      installButton.setAttribute("hidden", "");
+    }
+
+    window.addEventListener("appinstalled", () => {
+      disableInAppInstallPrompt();
+    });
+  </script>
 </body>
 </html>
